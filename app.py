@@ -146,15 +146,15 @@ def abebooks(keyword):
     except:
         print(' |_  No item found.')
     
-def waterstones(keyword):
+def barnesandnoble(keyword):
        
     keyword2 = keyword.replace(' ', '+')
-    waterstones_search=f'https://www.barnesandnoble.com/s/{keyword2}'
+    barnesandnoble_search=f'https://www.barnesandnoble.com/s/{keyword2}'
 
-    res = requests.get(waterstones_search, headers=headers)
+    res = requests.get(barnesandnoble_search, headers=headers)
     
-    ic(waterstones_search)
-    print('\nSearching Waterstones ...\n |')
+    ic(barnesandnoble_search)
+    print('\nSearching Barnes & Noble ...\n |')
     
     soup = BeautifulSoup(res.text,'html.parser')
     
@@ -195,22 +195,78 @@ def waterstones(keyword):
         best_price = min(prices)
         best_price_link = links[prices.index(best_price)]
         
+        print(f' |  > Best Price: $ {best_price}\n |_ > Link: {best_price_link}')
+    
+    except:
+        print(' |_  No item found.')
+    
+    
+def biblio(keyword):
+    
+    keyword2 = keyword.replace(' ', '+')
+    barnesandnoble_search=f'https://www.biblio.com/search.php?stage=1&result_type=works&keyisbn={keyword2}'
+
+    res = requests.get(barnesandnoble_search, headers=headers)
+    
+    ic(barnesandnoble_search)
+    print('\nSearching Biblio ...\n |')
+    
+    soup = BeautifulSoup(res.text,'html.parser')
+    
+    try:
+        results = soup.select('.results')[0].select('.item')
+        
+        ic(len(results))
+        
+        prices = []
+        links = []
+
+        for result in results:
+                
+            # keeping only exact keyword matches
+            title = result.select('.title')[0].text
+            if keyword.lower() not in title.lower(): 
+                results.remove(result)
+                continue
+            
+            # removing item without prices
+            try:
+                price = result.select('.item-price')[0].text
+                price = re.findall("\d+\.\d+", price)[0] # extracts float from string
+                prices.append(float(price))
+            except:
+                ic('filtering: item without price')
+                results.remove(result)
+                continue
+            
+            link = result.select('.title')[0].select('a')[0]['href']
+            links.append(link)
+            
+        ic(len(results))
+
+        ic(prices, links)
+        
+        best_price = min(prices)
+        best_price_link = links[prices.index(best_price)]
+        
         print(f' |  > Best Price: $ {best_price}\n |_ > Link: {best_price_link}\n')
     
     except:
         print(' |_  No item found.')
+    
+# ---------------------------------------------------------------------------------------   
     
 def compare():
     
     book = input("What book do you wanna search for ?\n > ")
     abebooks(book)
     amazon(book)
-    waterstones(book)
-
-
-
+    barnesandnoble(book)
+    biblio(book)
 
 book = 'automate the boring stuff with python'    
 
 ic.disable()
+# compare()
+
 compare()
