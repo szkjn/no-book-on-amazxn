@@ -1,6 +1,6 @@
 # Book price comparison
 
-tech: BeautifulSoup, request, icecream<br>
+tech: BeautifulSoup, requests, icecream<br>
 version: 1.1.1
 
 ## Overview
